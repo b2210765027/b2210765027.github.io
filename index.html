@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Navigation for Duckiebots</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --accent-red: #e11d48;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.7;
+            scroll-behavior: smooth;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .nav-logo { font-weight: 700; font-size: 1.2rem; color: var(--text-main); }
+        .nav-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-links a:hover { color: var(--accent-red); }
+
+        /* Hero Section */
+        header {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(225, 29, 72, 0.15) 0%, transparent 70%);
+            z-index: -1;
+        }
+        .uni-logo { width: 120px; height: 120px; background: #fff; border-radius: 50%; margin-bottom: 2rem; display: flex; align-items: center; justify-content: center; color: #000; font-weight: bold;}
+        header h1 { font-size: 4rem; font-weight: 700; margin-bottom: 1rem; background: linear-gradient(to right, #fff, var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        header h2 { font-size: 1.5rem; color: var(--accent-red); font-weight: 400; margin-bottom: 1.5rem; }
+        header p { font-size: 1.1rem; color: var(--text-muted); max-width: 800px; margin-bottom: 3rem; }
+        
+        /* Buttons */
+        .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            padding: 0.8rem 1.8rem;
+            background: var(--accent-red);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 2px solid var(--accent-red);
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent-red);
+            background: rgba(225, 29, 72, 0.1);
+            box-shadow: none;
+        }
+
+        /* Sections */
+        section { padding: 6rem 2rem 2rem; max-width: 1400px; margin: 0 auto; }
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+            display: inline-block;
+        }
+        .section-title::after {
+            content: ''; position: absolute; bottom: -10px; left: 0; width: 50%; height: 4px; background: var(--accent-red); border-radius: 2px;
+        }
+
+        /* Cards & Media */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(550px, 1fr)); gap: 2rem; }
+        .card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { color: var(--accent-red); margin-bottom: 1rem; font-size: 1.3rem; }
+        
+        .media-placeholder {
+            width: 100%; height: 550px;
+            background: linear-gradient(45deg, #1e293b, #334155);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); font-family: 'Fira Code', monospace;
+            margin-bottom: 1.5rem; overflow: hidden;
+            border: 1px dashed rgba(255,255,255,0.2);
+            position: relative;
+        }
+        .media-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Gallery Section */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        .gallery-item {
+            height: 350px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            cursor: pointer;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+        .gallery-caption {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.7);
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .gallery-item:hover .gallery-caption {
+            transform: translateY(0);
+        }
+
+        /* Team Section */
+        .team-grid { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; }
+        .member { text-align: center; width: 180px; }
+        .photo-placeholder {
+            width: 150px; height: 150px;
+            background: var(--bg-card);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex; align-items: center; justify-content: center;
+            border: 3px solid var(--accent-red);
+            font-size: 0.8rem; color: var(--text-muted); overflow: hidden;
+        }
+        .photo-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Math/Code Display */
+        .math-box {
+            background: #000; padding: 1.5rem; border-radius: 8px; font-family: 'Fira Code', monospace; color: #10b981; overflow-x: auto; margin: 1.5rem 0;
+        }
+
+        footer { text-align: center; padding: 3rem; background: #000; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 5rem; }
+
+
+        /* Ördek Animasyonu Stilleri */
+        .duck-animation {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: -100px;
+            opacity: 0.55;
+            z-index: -1;
+            animation: swimDuck 20s linear infinite;
+            pointer-events: none;
+        }
+
+        .duck-animation img {
+            width: 80px;
+            height: auto;
+            border-radius: 50%;
+            mix-blend-mode: multiply;
+        }
+
+        /* Kayma Animasyonunun Anahtarları */
+        @keyframes swimDuck {
+            0% {
+                left: -100px;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* Footer ve NVIDIA Logo Stilleri */
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px; /* Yazı ile logo arasındaki boşluk */
+        }
+        
+        .footer-content p {
+            margin: 0; /* Paragrafın kendi boşluğunu sıfırlayarak tam ortalanmasını sağlar */
+        }
+
+        .footer-logo {
+            height: 75px; /* Logonun boyutu (çok büyük durmaması için) */
+            filter: grayscale(100%) opacity(1.0); /* Başlangıçta gri ve yarı saydam (profesyonel görünüm) */
+            transition: all 0.3s ease; /* Hover efekti için yumuşak geçiş */
+            cursor: pointer;
+        }
+
+        .footer-logo:hover {
+            filter: grayscale(0%) opacity(1); /* Üzerine gelince kendi yeşil rengine döner */
+            transform: scale(1.15); /* Çok hafif büyür */
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="duck-animation">
+            <img src="logos/duck.png" alt="Moving Duck">
+        </div>
+        
+        <div class="nav-logo">DUCKIETOWN PROJECT</div>
+        <div class="nav-links">
+            <a href="#about">Abstract</a>
+            <a href="#media-demo">Demos</a>
+            <a href="#gallery">Gallery</a>
+            <a href="#methodology">Methodology</a>
+            <a href="#team">Team</a>
+        </div>
+    </nav>
+
+    <header id="home">
+        <div class="hero-bg"></div>
+        <img src="logos/4.png" alt="Hacettepe Logo" style="width: 7%;">
+            HACETTEPE UNIVERSITY - DEPARTMENT OF COMPUTER ENGINEERING
+        </div>
+        <h1>Autonomous Navigation for Duckiebots</h1>
+        <h2>Hacettepe University • Computer Engineering</h2>
+        <p>A complete, full-stack autonomous navigation system for the resource-constrained Duckiebot platform utilizing a LAN-optimized ROS architecture.</p>
+        
+        <div class="btn-group">
+            <a href="#media-demo" class="btn">🎬 Watch Demos</a>
+            <a href="EndOfProject.pdf" target="_blank" class="btn btn-outline">📄 Read Report (PDF)</a>
+            <a href="poster.png" target="_blank" class="btn btn-outline">🖼️ View Poster</a>
+        </div>
+    </header>
+
+    <section id="about">
+        <h2 class="section-title">Abstract & Problem Definition</h2>
+        <div class="card-grid">
+            <div class="card">
+                <h3>The Challenge</h3>
+                <p>Deploying multi-layered autonomy on resource-constrained embedded platforms like the Duckiebot presents a significant engineering challenge. These platforms rely on a basic sensor array—a monocular camera, wheel encoders, and an IMU—that lacks native depth perception and is highly susceptible to cumulative errors. Attempting to execute sophisticated perception models and high-level control loops locally saturates the onboard processing unit at approximately 98% utilization. This computational bottleneck induces severe system latency, preventing the robot from reacting to dynamic obstacles or maintaining real-time closed-loop stability. The core problem is orchestrating a complex navigation stack—encompassing localization, vision, path planning, and obstacle avoidance—on hardware that cannot natively support monolithic execution.</p>
+            </div>
+            <div class="card">
+                <h3>Our Solution</h3>
+                <p>To deliver a complete, multi-layered autonomous driving system, we developed a dual-module navigation architecture centered on robust path planning and reactive control. The core of the system is divided into two specialized modules. The first module handles continuous reactive control, utilizing a PID-driven visual lane-following system operating concurrently with a YOLOv5 model for object detection and parameterized evasive maneuvers. The second module manages complex spatial routing, employing a hybrid planner where the A* algorithm generates optimal global paths across a static cost-map, while a custom Dynamic Window Approach (DWA) facilitates local path execution and dynamic obstacle clearance. To execute this sophisticated autonomy stack seamlessly on constrained hardware, we implemented a distributed Robot Operating System (ROS) network. By strategically offloading the computationally intensive perception and planning tasks to a remote workstation, we successfully reduced the onboard CPU load to ~35%, ensuring stable, real-time execution.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="media-demo">
+        <h2 class="section-title">System in Action</h2>
+        <div class="card-grid">
+            <div>
+                <div class="media-placeholder">
+                    <img src="logos/3D Map with Autonomous Driving.MOV.gif" alt="Lane Following Demo">
+                </div>
+                <p><strong>Module 1:</strong>  Real-time, vision-based lane-following system driven by a PID controller and a fine-tuned YOLOv5 model, fully integrated into our custom development application with live map-based monitoring.</p>
+            </div>
+            <div>
+                <div class="media-placeholder">
+                     <img src="logos/Obstacle Avoidance Demo.MOV.gif" alt="Obstacle Avoidance Demo">
+                </div>
+                <p><strong>Module 2:</strong>  Combines a vision-based PID lane follower with a remote fine-tuned YOLOv5 model for real-time object detection and dynamic obstacle avoidance.</p>
+            </div>
+            <div>
+                <div class="media-placeholder">
+                    <img src="logos/3D Map with Multi Vehicle.gif" alt="3D Map with Multi Vehicles Demo">
+                </div>
+                <p><strong>Module 3:</strong> Extends the custom application's live monitoring to support multi-vehicle tracking, displaying multiple Duckiebots simultaneously on the real-time map interface.</p>
+            </div>
+            <div>
+                <div class="media-placeholder">
+                    <img src="logos/Following Distance Demo.gif" alt="Following Distance Demo">
+                </div>
+                <p><strong>Module 4:</strong> Implements YOLO-based obstacle detection to dynamically track a leading Duckiebot and maintain a safe following distance.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery">
+        <h2 class="section-title">Project Gallery</h2>
+        <p style="margin-bottom: 2rem; color: var(--text-muted);">Visual highlights from our development process, track testing, and architecture mapping.</p>
+        
+        <div class="gallery-grid">
+            <div class="gallery-item">
+            <img src="logos/assembly.jpg.jpeg" alt="Duckiebot Hardware">
+            <div class="gallery-caption">Hardware Setup</div>
+            </div>
+            <div class="gallery-item">
+                <img src="logos/Duckietown.jpg" alt="Duckiebot Track">
+                <div class="gallery-caption">Duckietown Track</div>
+            </div>
+            <div class="gallery-item">
+                <img src="logos/Object Detection.png" alt="YOLO Detection UI">
+                <div class="gallery-caption">YOLOv5 Detection UI</div>
+            </div>
+            <div class="gallery-item">
+                <img src="logos/Rviz path planning.png" alt="Path Planning Visualization">
+                <div class="gallery-caption">A* Directed Graph</div>
+            </div>
+            <div class="gallery-item">
+                <img src="logos/first_run.jpg.jpeg" alt="Team's First Run Photo">
+                <div class="gallery-caption">Team's First Run Photo</div>
+            </div>
+            <div class="gallery-item">
+                <img src="logos/3D Path Plan Visualization.jpg" alt="3D Path Planning Visualization">
+                <div class="gallery-caption">3D Path Planning Visualization and custom development application with live map-based monitoring.</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="methodology">
+        <h2 class="section-title">Methodology & System Architecture</h2>
+        <p style="margin-bottom: 2rem; color: var(--text-muted);">The autonomous navigation stack is engineered around a bifurcated, multi-layered architecture. By decoupling high-level cognitive tasks from low-level hardware actuation via a distributed ROS network, the system achieves real-time closed-loop stability while evaluating complex perception and planning algorithms.</p>
+        
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3>Kinematic Modeling & Hybrid Localization</h3>
+            <p>Initial high-frequency spatial tracking is achieved through encoder-based dead-reckoning derived from a differential drive kinematic model. The linear velocity (<i>v</i>) and angular velocity (<i>&omega;</i>) are computed to propagate the robot's global pose (<i>x, y, &theta;</i>) over discrete time steps (<i>&Delta;t</i>):</p>
+            
+            <div class="math-box" style="text-align: center; font-size: 1.1rem; letter-spacing: 1px;">
+                v = (R / 2) &middot; (&omega;<sub>r</sub> + &omega;<sub>l</sub>)<br><br>
+                &omega; = (R / L) &middot; (&omega;<sub>r</sub> - &omega;<sub>l</sub>)<br><br>
+                x<sub>t+1</sub> = x<sub>t</sub> + v &middot; cos(&theta;<sub>t</sub>) &middot; &Delta;t<br><br>
+                y<sub>t+1</sub> = y<sub>t</sub> + v &middot; sin(&theta;<sub>t</sub>) &middot; &Delta;t<br><br>
+                &theta;<sub>t+1</sub> = &theta;<sub>t</sub> + &omega; &middot; &Delta;t
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; border-left: 2px solid var(--accent-red); padding-left: 10px;">
+                <i>Where <b>R</b> is the wheel radius, <b>L</b> is the wheelbase, and <b>&omega;<sub>r</sub></b>, <b>&omega;<sub>l</sub></b> represent the angular velocities of the right and left wheels, respectively.</i>
+            </p>
+
+            <p>To mitigate the inherent cumulative drift associated with wheel slippage, the localization pipeline integrates an absolute correction mechanism. Upon visual detection of map-aligned ARTag/AprilTag fiducial markers, the perception node calculates an SE(3) transformation matrix to overwrite the odometry frame, ensuring persistent global accuracy without the computational overhead of full Monocular SLAM.</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3>Perception Stack & Reactive Control</h3>
+            <p>The perception layer is divided into traditional computer vision for structural extraction and deep learning for semantic object detection. Lane boundaries are isolated within the HSV color space using adaptive thresholding, processed through a Canny edge detector and Probabilistic Hough Transform, and subsequently fed into a Histogram Filter to continuously estimate lateral offset (<i>d</i>) and heading error (<i>&theta;</i>).</p>
+            
+            <p style="margin-top: 1rem;">To maintain continuous trajectory alignment within a lane, a Proportional-Integral-Derivative (PID) controller calculates a steering command (angular velocity, <i>&omega;</i>) based on the estimated errors:</p>
+            
+            <div class="math-box" style="text-align: center; font-size: 1.1rem; letter-spacing: 1px;">
+                &omega;(t) = K<sub>p</sub>e(t) + K<sub>i</sub> &int;<sub>0</sub><sup>t</sup> e(&tau;)d&tau; + K<sub>d</sub> (de(t)/dt)
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; border-left: 2px solid var(--accent-red); padding-left: 10px;">
+                <i>Where <b>e(t)</b> is a weighted combination of the lateral and heading errors, and <b>K<sub>p</sub></b>, <b>K<sub>i</sub></b>, <b>K<sub>d</sub></b> are the empirically tuned controller gains.</i>
+            </p>
+
+            <p style="margin-top: 1rem;">Concurrently, a fine-tuned YOLOv5s model handles dynamic object detection. To overcome the camera's limited field of view, we engineered a persistent obstacle memory mechanism. Detections are projected via ROS TF2 into global map coordinates and maintained via a moving average temporal filter. This custom node assigns semantic priors (safety margins) to classes and retains spatial memory of obstacles even after they leave the camera frame.</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3>Hierarchical Trajectory Planning & Dynamic Execution</h3>
+            <p>Goal-oriented navigation relies on a dual-layered planning architecture. Global routing is resolved using the A* algorithm over a discretized directed graph generated from the topological road map, utilizing Bezier curves for smooth intersection transitions and Manhattan distance heuristics.</p>
+            
+            <p style="margin-top: 1rem;">For local execution, a custom, lightweight Dynamic Window Approach (DWA) operates at 10 Hz, forward-simulating kinematically feasible trajectories. Trajectories are evaluated against a multi-objective cost function to select optimal motor commands:</p>
+            
+            <div class="math-box" style="text-align: center; font-size: 1.1rem; letter-spacing: 1px;">
+                C<sub>total</sub> = W<sub>path</sub>C<sub>path</sub> + W<sub>obs</sub>C<sub>obs</sub> + W<sub>vel</sub>R<sub>vel</sub> + W<sub>head</sub>C<sub>head</sub>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; border-left: 2px solid var(--accent-red); padding-left: 10px;">
+                <i>Where <b>C<sub>path</sub></b> ensures lane adherence, <b>C<sub>obs</sub></b> applies a repulsive potential field for obstacle clearance, <b>R<sub>vel</sub></b> incentivizes forward progression, and <b>C<sub>head</sub></b> aligns the final angle with the global path.</i>
+            </p>
+
+            <p>This formulation enforces strict obstacle repulsion—applying infinite cost penalties for safety margin violations—while optimizing for path adherence and forward progression.</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3>Human-Machine Interface (HMI) & Telemetry</h3>
+            <p>To monitor and control the distributed architecture, a custom cross-platform interface was developed for Web and Mobile environments. Utilizing mDNS for local network discovery, the frontend leverages Three.js to render a hardware-accelerated 3D environment.</p>
+            
+            <p style="margin-top: 1rem;">Through a WebSocket bridge, the application receives high-frequency telemetry, including pose data, velocity, YOLOv5 bounding boxes, and the live camera feed. This enables operators to view live spatial tracking, input target coordinates for the A* planner, or seamlessly seize manual control via virtual joysticks without interrupting the underlying control loops.</p>
+        </div>
+
+        <div class="card">
+            <h3>Distributed ROS Architecture Integration</h3>
+            <p>The entire autonomy stack operates over a distributed Robot Operating System (ROS) network to prevent embedded hardware saturation. By strategically isolating low-level hardware actuation on the edge device and offloading computationally intensive perception (YOLOv5s) and trajectory planning nodes to a remote workstation, the system successfully reduces the onboard CPU load from ~98% to ~35%. This execution split ensures that the high-frequency PID steering controllers and safety deceleration modules maintain strict real-time responsiveness.</p>
+        </div>
+    </section>
+
+    <section id="results">
+        <h2 class="section-title">Results & Impact</h2>
+        <p style="margin-bottom: 2rem; color: var(--text-muted);">The implementation of our distributed navigation stack yielded highly stable, real-time autonomous performance, successfully bridging the gap between theoretical algorithms and resource-constrained edge hardware.</p>
+        
+        <div class="card-grid">
+            <div class="card">
+                <h3>Computational Optimization</h3>
+                <p>Initial monolithic testing revealed that executing perception and planning algorithms locally saturated the Duckiebot's CPU at approximately 98%, inducing severe thermal throttling and control instability. By strategically offloading these cognitive nodes via our ROS architecture, the onboard CPU load was reduced to a stable ~35%. A minimal communication latency was maintained, proving entirely sufficient to guarantee real-time closed-loop stability.</p>
+            </div>
+            
+            <div class="card">
+                <h3>Reactive Navigation & Safety</h3>
+                <p>The PID-driven visual lane-following system successfully minimized lateral and heading errors to maintain smooth trajectory alignment. Crucially, the custom obstacle memory node decoupled spatial awareness from the camera's instantaneous field of view. This allowed the safety module to execute a smooth linear deceleration profile and halt the robot safely, even when dynamic obstacles temporarily exited the frame during tight maneuvers.</p>
+            </div>
+            
+            <div class="card">
+                <h3>Dynamic Planning Performance</h3>
+                <p>Operating on the discretized topological cost-map, the A* algorithm provided highly stable and computationally efficient global reference paths. The custom DWA local planner, operating at a high frequency of 10 Hz, successfully sampled kinematically feasible velocities to clear obstacle safety margins. It seamlessly guided the robot back to the global path without triggering resource-heavy route replanning.</p>
+            </div>
+
+            <div class="card">
+                <h3>Localization Robustness</h3>
+                <p>As anticipated, relying exclusively on wheel encoders resulted in significant cumulative spatial drift. By integrating periodic SE(3) pose corrections via ARTag fiducial markers, the system achieved precise global accuracy. This hybrid approach provided the spatial reliability necessary for complex routing while avoiding the massive computational overhead and latency associated with full Monocular SLAM.</p>
+            </div>
+
+            <div class="card">
+                <h3>Human-Machine Interface (HMI)</h3>
+                <p>The cross-platform Web/Mobile application successfully validated the distributed system's integration. The Three.js-rendered 3D environment accurately visualized live telemetry, YOLOv5 bounding boxes, and projected DWA trajectories. The system demonstrated high fault tolerance, allowing operators to seamlessly toggle between autonomous coordinate dispatching and manual overrides without disrupting the underlying control loops.</p>
+            </div>
+
+            <div class="card">
+                <h3>Future Directions & Scalability</h3>
+                <p>With a highly reliable single-agent baseline established, future development will expand into a comprehensive "Live City" paradigm. Planned architectural upgrades include translating visual markers into strict traffic rule compliance (e.g., intersection yielding and light detection). Furthermore, the system is primed to leverage the DWA simulations for complex autonomous parking maneuvers and utilize the robust telemetry stack to reintroduce multi-robot swarm logic for cooperative vehicle following.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="team">
+        <h2 class="section-title" style="text-align: center; display: block;">The Team</h2>
+        <p style="text-align: center; color: var(--text-muted); margin-bottom: 3rem;">Supervisor: Özgür Erkent</p>
+        <div class="team-grid">
+            <div class="member">
+                <div class="photo-placeholder">
+                <img src="logos/Omer_Kayra.jpeg" alt="Ömer Kayra Çetin Photo">
+                </div>
+                <h4>Ömer Kayra Çetin</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">2210356060</p>
+            </div>
+            <div class="member">
+                <div class="photo-placeholder">
+                <img src="logos/Yunus_Emre.jpeg" alt="Yunus Emre Uluer Photo">
+                </div>
+                <h4>Yunus Emre Uluer</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">2210356102</p>
+            </div>
+            <div class="member">
+                <div class="photo-placeholder">
+                    <img src="logos/Babaking.jpeg" alt="Mehmet Yılmaz Erdem Photo">
+                </div>
+                <h4>Mehmet Yılmaz Erdem</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">2210765036</p>
+            </div>
+            <div class="member">
+                <div class="photo-placeholder">
+                <img src="logos/Said_Oguzturk.JPG" alt="Mustafa Said Oğuztürk Photo">
+                </div>
+                <h4>Mustafa Said Oğuztürk</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">2210765027</p>
+            </div>
+            <div class="member">
+                <div class="photo-placeholder">
+                <img src="logos/Arda_Deniz.jpeg" alt="Arda Deniz Ayyıldız Photo">
+                </div>
+                <h4>Arda Deniz Ayyıldız</h4>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">2210765018</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Hacettepe University BBM479/480 Design Project. All rights reserved.</p>
+            <img src="logos/nvidia.png" alt="NVIDIA" class="footer-logo">
+        </div>
+    </footer>
+
+</body>
+</html>
