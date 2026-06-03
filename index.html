@@ -251,6 +251,62 @@
             filter: grayscale(0%) opacity(1); /* Üzerine gelince kendi yeşil rengine döner */
             transform: scale(1.15); /* Çok hafif büyür */
         }
+
+        /* =========================================
+           MOBİL UYUMLULUK (RESPONSIVE DESIGN) 
+           ========================================= */
+        @media (max-width: 768px) {
+            /* Navigasyon: Mobilde logoyu ve linkleri alt alta ortala */
+            nav {
+                flex-direction: column;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            .nav-links {
+                justify-content: center;
+                gap: 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            /* Ana Başlık (Hero): Font boyutlarını telefon ekranına göre küçült */
+            header {
+                padding: 6rem 1rem 2rem; /* Navbar menüsünün altında kalmaması için üstten boşluk */
+            }
+            header h1 {
+                font-size: 2.2rem;
+            }
+            header h2 {
+                font-size: 1.1rem;
+            }
+
+            /* Bölümler: Kenar boşluklarını daralt */
+            section {
+                padding: 4rem 1rem 1rem;
+            }
+            .section-title {
+                font-size: 2rem;
+            }
+
+            /* Galeri ve Kartlar: Mobilde tek sütun yap veya minimum genişliği daralt */
+            .card-grid {
+                grid-template-columns: 1fr; /* Mobilde kartları alt alta diz */
+            }
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 350px mobilde taşma yapar, 280px'e çektik */
+            }
+
+            /* Matematik Formülleri: Fontu küçült (Yatay kaydırma zaten overflow-x: auto ile aktif) */
+            .math-box {
+                font-size: 0.9rem !important;
+                padding: 1rem;
+            }
+
+            /* Footer: Copyright yazısı ve NVIDIA logosunu alt alta ortala */
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -294,7 +350,7 @@
             </div>
             <div class="card">
                 <h3>Our Solution</h3>
-                <p>To deliver a complete, multi-layered autonomous driving system, we developed a dual-module navigation architecture centered on robust path planning and reactive control. The core of the system is divided into two specialized modules. The first module handles continuous reactive control, utilizing a PID-driven visual lane-following system operating concurrently with a YOLOv5 model for object detection and parameterized evasive maneuvers. The second module manages complex spatial routing, employing a hybrid planner where the A* algorithm generates optimal global paths across a static cost-map, while a custom Dynamic Window Approach (DWA) facilitates local path execution and dynamic obstacle clearance. To execute this sophisticated autonomy stack seamlessly on constrained hardware, we implemented a distributed Robot Operating System (ROS) network. By strategically offloading the computationally intensive perception and planning tasks to a remote workstation, we successfully reduced the onboard CPU load to ~35%, ensuring stable, real-time execution.</p>
+                <p>To deliver a complete, multi-layered autonomous driving system, we developed a dual-module navigation architecture centered on robust path planning and reactive control. The core of the system is divided into two specialized modules. The first module handles continuous reactive control, utilizing a PID-driven visual lane-following system operating concurrently with a YOLOv5 model for object detection and parameterized evasive maneuvers. The second module manages complex spatial routing, employing a hybrid planner where the A* algorithm generates optimal global paths across a static cost-map, while a custom Dynamic Window Approach (DWA) is developed for local path execution and dynamic obstacle clearance. To execute this sophisticated autonomy stack seamlessly on constrained hardware, we implemented a distributed Robot Operating System (ROS) network. By strategically offloading the computationally intensive perception and planning tasks to a remote workstation, we successfully reduced the onboard CPU load to ~35%, ensuring stable, real-time execution.</p>
             </div>
         </div>
     </section>
@@ -445,7 +501,7 @@
             
             <div class="card">
                 <h3>Dynamic Planning Performance</h3>
-                <p>Operating on the discretized topological cost-map, the A* algorithm provided highly stable and computationally efficient global reference paths. The custom DWA local planner, operating at a high frequency of 10 Hz, successfully sampled kinematically feasible velocities to clear obstacle safety margins. It seamlessly guided the robot back to the global path without triggering resource-heavy route replanning.</p>
+                <p>Operating on the discretized topological cost-map, the A* algorithm provided highly stable and computationally efficient global reference paths. The custom DWA local planner, operating at a high frequency of 10 Hz, successfully sampled kinematically feasible velocities. However, testing revealed a look-ahead tracking bug that currently limits dynamic path execution, highlighting a clear focal point for future development.</p>
             </div>
 
             <div class="card">
@@ -460,7 +516,7 @@
 
             <div class="card">
                 <h3>Future Directions & Scalability</h3>
-                <p>With a highly reliable single-agent baseline established, future development will expand into a comprehensive "Live City" paradigm. Planned architectural upgrades include translating visual markers into strict traffic rule compliance (e.g., intersection yielding and light detection). Furthermore, the system is primed to leverage the DWA simulations for complex autonomous parking maneuvers and utilize the robust telemetry stack to reintroduce multi-robot swarm logic for cooperative vehicle following.</p>
+                <p>For future continuations of this project, the immediate priority should be resolving the DWA look-ahead tracking bug to stabilize dynamic path execution. Once resolved, the architecture could be expanded into a comprehensive "Live City" paradigm. Potential upgrades include translating visual markers for strict traffic rule compliance, leveraging DWA simulations for autonomous parking, and utilizing the existing telemetry stack to explore multi-robot swarm logic.</p>
             </div>
         </div>
     </section>
